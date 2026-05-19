@@ -103,6 +103,24 @@ export function createTemplateRefSetter(): setRefFn {
   }
 }
 
+export function setStaticTemplateRef(
+  el: RefEl,
+  ref: NodeRef,
+  refFor?: boolean,
+  refKey?: string,
+): NodeRef | undefined {
+  // Static refs are one-shot compiler output, so they don't need the dynamic
+  // setter's old-ref tracking or DynamicFragment update hooks.
+  return setRef(
+    currentInstance as VaporComponentInstance,
+    el,
+    ref,
+    undefined,
+    refFor,
+    refKey,
+  )
+}
+
 /**
  * Function for handling a template ref
  */

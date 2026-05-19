@@ -45,8 +45,8 @@ describe('compiler: template ref transform', () => {
       },
     })
     expect(code).matchSnapshot()
-    expect(code).contains('const _setTemplateRef = _createTemplateRefSetter()')
-    expect(code).contains('_setTemplateRef(n0, "foo")')
+    expect(code).contains('_setStaticTemplateRef(n0, "foo")')
+    expect(code).not.contains('_createTemplateRefSetter')
   })
 
   test('static ref (inline mode)', () => {
@@ -56,7 +56,16 @@ describe('compiler: template ref transform', () => {
     })
     expect(code).matchSnapshot()
     // pass the actual ref and ref key
-    expect(code).contains('_setTemplateRef(n0, foo, null, "foo")')
+    expect(code).contains('_setStaticTemplateRef(n0, foo, null, "foo")')
+    expect(code).not.contains('_createTemplateRefSetter')
+  })
+
+  test('component static ref', () => {
+    const { code } = compileWithTransformRef(`<Foo ref="foo" />`)
+    expect(code).matchSnapshot()
+    expect(code).contains('const _setTemplateRef = _createTemplateRefSetter()')
+    expect(code).contains('_setTemplateRef(n0, "foo")')
+    expect(code).not.contains('_setStaticTemplateRef')
   })
 
   test('dynamic ref', () => {
@@ -82,8 +91,9 @@ describe('compiler: template ref transform', () => {
       },
     ])
     expect(code).matchSnapshot()
-    expect(code).contains('const _setTemplateRef = _createTemplateRefSetter()')
-    expect(code).contains('_setTemplateRef(n0, _ctx.foo)')
+    expect(code).contains('_setTemplateRefBinding(n0, () => _ctx.foo)')
+    expect(code).not.contains('_createTemplateRefSetter')
+    expect(code).not.contains('_renderEffect')
   })
 
   test('function ref', () => {

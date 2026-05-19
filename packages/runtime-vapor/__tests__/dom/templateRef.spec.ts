@@ -10,6 +10,8 @@ import {
   delegateEvents,
   insert,
   renderEffect,
+  setStaticTemplateRef,
+  setTemplateRefBinding,
   template,
 } from '../../src'
 import { compile, makeRender, runtimeDom, runtimeVapor } from '../_utils'
@@ -49,6 +51,26 @@ describe('api: template ref', () => {
     expect(el.value).toBe(host.children[0])
   })
 
+  test('static string ref helper mount', () => {
+    const t0 = template('<div ref="refKey"></div>')
+    const el = ref(null)
+    const { render } = define({
+      setup() {
+        return {
+          refKey: el,
+        }
+      },
+      render() {
+        const n0 = t0()
+        setStaticTemplateRef(n0 as Element, 'refKey')
+        return n0
+      },
+    })
+
+    const { host } = render()
+    expect(el.value).toBe(host.children[0])
+  })
+
   it('string ref update', async () => {
     const t0 = template('<div></div>')
     const fooEl = ref(null)
@@ -68,6 +90,35 @@ describe('api: template ref', () => {
         renderEffect(() => {
           setRef(n0 as Element, refKey.value)
         })
+        return n0
+      },
+    })
+    const { host } = render()
+    expect(fooEl.value).toBe(host.children[0])
+    expect(barEl.value).toBe(null)
+
+    refKey.value = 'bar'
+    await nextTick()
+    expect(barEl.value).toBe(host.children[0])
+    expect(fooEl.value).toBe(null)
+  })
+
+  it('string ref binding update', async () => {
+    const t0 = template('<div></div>')
+    const fooEl = ref(null)
+    const barEl = ref(null)
+    const refKey = ref('foo')
+
+    const { render } = define({
+      setup() {
+        return {
+          foo: fooEl,
+          bar: barEl,
+        }
+      },
+      render() {
+        const n0 = t0()
+        setTemplateRefBinding(n0 as Element, () => refKey.value)
         return n0
       },
     })

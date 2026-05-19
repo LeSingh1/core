@@ -8,6 +8,7 @@ import {
   type SetEventIRNode,
   type SetHtmlIRNode,
   type SetPropIRNode,
+  type SetTemplateRefIRNode,
   type SetTextIRNode,
   isBlockOperation,
 } from '../ir'
@@ -29,7 +30,7 @@ import {
   genSetProp,
   genSetPropBinding,
 } from './prop'
-import { genSetTemplateRef } from './templateRef'
+import { genSetTemplateRef, genSetTemplateRefBinding } from './templateRef'
 import {
   genGetTextChild,
   genSetBlockTextBinding,
@@ -265,6 +266,8 @@ function resolveSingleOperationBinding(
       return resolveSetEventBinding(opers, effect.operations[0], context)
     case IRNodeTypes.SET_DYNAMIC_EVENTS:
       return resolveDynamicEventsBinding(opers, effect.operations[0], context)
+    case IRNodeTypes.SET_TEMPLATE_REF:
+      return resolveSetTemplateRefBinding(opers, effect.operations[0], context)
     default:
       return
   }
@@ -326,6 +329,19 @@ function resolveDynamicEventsBinding(
   return {
     operations: opers,
     genBinding: () => genSetDynamicEventsBinding(dynamicEvents, context),
+  }
+}
+
+function resolveSetTemplateRefBinding(
+  opers: OperationNode[],
+  setTemplateRef: SetTemplateRefIRNode,
+  context: CodegenContext,
+): SingleOperationBindingLowering | undefined {
+  if (!setTemplateRef.effect) return
+
+  return {
+    operations: opers,
+    genBinding: () => genSetTemplateRefBinding(setTemplateRef, context),
   }
 }
 

@@ -1,5 +1,10 @@
 import { inOnceSlot } from '../componentSlots'
 import { RenderEffect } from '../renderEffect'
+import {
+  type RefEl,
+  createTemplateRefSetter,
+  type setRefFn,
+} from '../apiTemplateRef'
 import { on, onBinding, setDynamicEvents } from './event'
 import { txt } from './node'
 import {
@@ -300,6 +305,32 @@ class DynamicEventsBindingEffect extends RenderEffect {
   }
 }
 
+class TemplateRefBindingEffect extends RenderEffect {
+  el: RefEl
+  getter: () => any
+  setter: setRefFn
+  refFor: boolean
+  refKey: string | undefined
+
+  constructor(
+    el: RefEl,
+    getter: () => any,
+    refFor: boolean,
+    refKey: string | undefined,
+  ) {
+    super(TemplateRefBindingEffect.prototype.renderTemplateRef)
+    this.el = el
+    this.getter = getter
+    this.setter = createTemplateRefSetter()
+    this.refFor = refFor
+    this.refKey = refKey
+  }
+
+  renderTemplateRef(): void {
+    this.setter(this.el, this.getter(), this.refFor, this.refKey)
+  }
+}
+
 export function setTextBinding(parent: ParentNode, getter: () => string): void {
   const text = txt(parent) as TextNodeWithCache
   if (inOnceSlot) {
@@ -509,5 +540,20 @@ export function setDynamicEventsBinding(
   }
 
   const effect = new DynamicEventsBindingEffect(el, getter)
+  effect.run()
+}
+
+export function setTemplateRefBinding(
+  el: RefEl,
+  getter: () => any,
+  refFor: boolean = false,
+  refKey?: string,
+): void {
+  if (inOnceSlot) {
+    createTemplateRefSetter()(el, getter(), refFor, refKey)
+    return
+  }
+
+  const effect = new TemplateRefBindingEffect(el, getter, refFor, refKey)
   effect.run()
 }

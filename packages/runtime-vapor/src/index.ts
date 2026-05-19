@@ -48,6 +48,7 @@ export {
   setMergedDynamicPropsBinding,
   setPropBinding,
   setStyleBinding,
+  setTemplateRefBinding,
   setTextBinding,
   setValueBinding,
 } from './dom/bindingEffect'
@@ -85,7 +86,7 @@ export {
   getRestElement,
   getDefaultValue,
 } from './apiCreateFor'
-export { createTemplateRefSetter } from './apiTemplateRef'
+export { createTemplateRefSetter, setStaticTemplateRef } from './apiTemplateRef'
 export { useVaporCssVars } from './helpers/useCssVars'
 export { setBlockKey } from './helpers/setKey'
 export { createDynamicComponent } from './apiCreateDynamicComponent'
